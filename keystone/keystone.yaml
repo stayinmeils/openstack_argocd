@@ -1,11 +1,140 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: secret-fernet-key
+  annotations:
+    argocd.argoproj.io/sync-wave : "-3"
+    argocd.argoproj.io/hook : PreSync
+type: Opaque
+data:
+  fernet-key: Q3hzju8F+U+jpQ0Zn4jAPKGaArSrK7rnTm4aCxIwL1c= # 生成命令：openssl rand -base64 32 | tr -d '\n'
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: secret-db
+  annotations:
+    argocd.argoproj.io/sync-wave : "-3"
+    argocd.argoproj.io/hook : PreSync
+type: Opaque
+stringData:  # 自动 base64 编码
+  username: admin
+  password: db-password-123
+  host: mysql-service
+  dbname: keystone
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: secret-keystone
+  annotations:
+    argocd.argoproj.io/sync-wave : "-3"
+    argocd.argoproj.io/hook : PreSync
+type: Opaque
+stringData:
+  admin-password: keystone-admin-pass
+  token-expiration: "3600"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: configmap-bin
+  annotations:
+    argocd.argoproj.io/sync-wave : "-3"
+    argocd.argoproj.io/hook : PreSync
+data:
+  bin-path: /usr/local/bin  # 示例键值对
+  log-level: "info"
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: role-keystone
+  annotations:
+    argocd.argoproj.io/sync-wave : "-3"
+    argocd.argoproj.io/hook : PreSync
+  namespace: default  # 指定命名空间
+rules:
+- apiGroups: [""]
+  resources: ["pods", "services", "endpoints"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: [""]
+  resources: ["configmaps", "secrets"]
+  verbs: ["get", "list", "create", "update"]
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: job-db-init
+  annotations:
+    argocd.argoproj.io/sync-wave : "-3"
+    argocd.argoproj.io/hook : PreSync
+spec:
+  template:
+    spec:
+      containers:
+      - name: init
+        image: busybox
+        command: ["/bin/sh", "-c", "echo 'DB Init Hello World!'; sleep $((RANDOM % 60))"]
+      restartPolicy: Never
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: job-credential-setup
+  annotations:
+    argocd.argoproj.io/sync-wave : "-2"
+    argocd.argoproj.io/hook : PreSync
+spec:
+  template:
+    spec:
+      containers:
+      - name: credential
+        image: busybox
+        command: ["/bin/sh", "-c", "echo 'Credential Hello World!'; sleep $((RANDOM % 60))"]
+      restartPolicy: Never
 
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: job-fernet-setup
+  annotations:
+    argocd.argoproj.io/sync-wave : "-2"
+    argocd.argoproj.io/hook : PreSync
+spec:
+  template:
+    spec:
+      containers:
+      - name: fernet
+        image: busybox
+        command: ["/bin/sh", "-c", "echo 'Fernet Hello World!'; sleep $((RANDOM % 60))"]
+      restartPolicy: Never
+
+---
+
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: job-db-sync
+  annotations:
+    argocd.argoproj.io/sync-wave : "-1"
+    argocd.argoproj.io/hook : PreSync
+spec:
+  template:
+    spec:
+      containers:
+      - name: sync
+        image: busybox
+        command: ["/bin/sh", "-c", "echo 'DB Sync Hello World!'; sleep $((RANDOM % 60))"]
+      restartPolicy: Never
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: keystone-api
   annotations:
     argocd.argoproj.io/sync-wave : "0"
-    argocd.argoproj.io/hook : Sync
 spec:
   replicas: 1
   selector:
@@ -20,6 +149,71 @@ spec:
       - name: hello-container
         image: busybox  # 轻量级 Linux 镜像
         command: ["/bin/sh", "-c", "echo 'Hello World!'; tail -f /dev/null"]  # 输出后保持运行
-
-
-
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: job-keystone-bootstrap
+  annotations:
+    argocd.argoproj.io/sync-wave : "1"
+    argocd.argoproj.io/hook : PostSync
+spec:
+  template:
+    spec:
+      containers:
+      - name: keystone
+        image: busybox
+        command: ["/bin/sh", "-c", "echo 'Keystone Bootstrap Hello World!'; sleep $((RANDOM % 60))"]
+      restartPolicy: Never
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: job-keystone-test
+  annotations:
+    argocd.argoproj.io/sync-wave : "2"
+    argocd.argoproj.io/hook : PostSync
+spec:
+  template:
+    spec:
+      containers:
+      - name: test
+        image: busybox
+        command: ["/bin/sh", "-c", "echo 'Keystone Test Hello World!'; sleep $((RANDOM % 60))"]
+      restartPolicy: Never
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: cronjob-credential-rotate
+  annotations:
+    argocd.argoproj.io/sync-wave: "3"
+spec:
+  schedule: "0 2 * * *"  # 每天凌晨2点执行
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: rotate
+            image: busybox
+            command: ["/bin/sh", "-c", "echo 'Rotate Credential Hello World!'"]
+          restartPolicy: OnFailure
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: cronjob-fernet-rotate
+  annotations:
+    argocd.argoproj.io/sync-wave: "3"
+spec:
+  schedule: "0 3 * * *"  # 每天凌晨3点执行
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: rotate
+            image: busybox
+            command: ["/bin/sh", "-c", "echo 'Rotate Fernet Hello World!'"]
+          restartPolicy: OnFailure
