@@ -1,3 +1,13 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: secret-fernet-key
+  annotations:
+    argocd.argoproj.io/sync-wave : "-3"
+    argocd.argoproj.io/hook : PreSync
+type: Opaque
+data:
+  fernet-key: Q3hzju8F+U+jpQ0Zn4jAPKGaArSrK7rnTm4aCxIwL1c= # 生成命令：openssl rand -base64 32 | tr -d '\n'
 ---
 apiVersion: v1
 kind: Secret
@@ -210,5 +220,3 @@ spec:
             image: busybox
             command: ["/bin/sh", "-c", "echo 'Rotate Fernet Hello World!'"]
           restartPolicy: OnFailure
-
-
