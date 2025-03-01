@@ -3,8 +3,8 @@ kind: Secret
 metadata:
   name: secret-fernet-key
   annotations:
-    argocd.argoproj.io/sync-wave:"-3"
-    argocd.argoproj.io/hook:PreSync
+    argocd.argoproj.io/sync-wave : "-3"
+    argocd.argoproj.io/hook : PreSync
 type: Opaque
 data:
   fernet-key: Q3hzju8F+U+jpQ0Zn4jAPKGaArSrK7rnTm4aCxIwL1c= # 生成命令：openssl rand -base64 32 | tr -d '\n'
@@ -14,8 +14,8 @@ kind: Secret
 metadata:
   name: secret-db
   annotations:
-    argocd.argoproj.io/sync-wave:"-3"
-    argocd.argoproj.io/hook:PreSync
+    argocd.argoproj.io/sync-wave : "-3"
+    argocd.argoproj.io/hook : PreSync
 type: Opaque
 stringData:  # 自动 base64 编码
   username: admin
@@ -28,8 +28,8 @@ kind: Secret
 metadata:
   name: secret-keystone
   annotations:
-    argocd.argoproj.io/sync-wave:"-3"
-    argocd.argoproj.io/hook:PreSync
+    argocd.argoproj.io/sync-wave : "-3"
+    argocd.argoproj.io/hook : PreSync
 type: Opaque
 stringData:
   admin-password: keystone-admin-pass
@@ -40,8 +40,8 @@ kind: ConfigMap
 metadata:
   name: configmap-bin
   annotations:
-    argocd.argoproj.io/sync-wave:"-3"
-    argocd.argoproj.io/hook:PreSync
+    argocd.argoproj.io/sync-wave : "-3"
+    argocd.argoproj.io/hook : PreSync
 data:
   bin-path: /usr/local/bin  # 示例键值对
   log-level: "info"
@@ -51,8 +51,8 @@ kind: Role
 metadata:
   name: role-keystone
   annotations:
-    argocd.argoproj.io/sync-wave:"-3"
-    argocd.argoproj.io/hook:PreSync
+    argocd.argoproj.io/sync-wave : "-3"
+    argocd.argoproj.io/hook : PreSync
   namespace: default  # 指定命名空间
 rules:
 - apiGroups: [""]
@@ -67,8 +67,8 @@ kind: Job
 metadata:
   name: job-db-init
   annotations:
-    argocd.argoproj.io/sync-wave:"-3"
-    argocd.argoproj.io/hook:PreSync
+    argocd.argoproj.io/sync-wave : "-3"
+    argocd.argoproj.io/hook : PreSync
 spec:
   template:
     spec:
@@ -83,8 +83,8 @@ kind: Job
 metadata:
   name: job-credential-setup
   annotations:
-    argocd.argoproj.io/sync-wave:"-2"
-    argocd.argoproj.io/hook:PreSync
+    argocd.argoproj.io/sync-wave : "-2"
+    argocd.argoproj.io/hook : PreSync
 spec:
   template:
     spec:
@@ -100,8 +100,8 @@ kind: Job
 metadata:
   name: job-fernet-setup
   annotations:
-    argocd.argoproj.io/sync-wave:"-2"
-    argocd.argoproj.io/hook:PreSync
+    argocd.argoproj.io/sync-wave : "-2"
+    argocd.argoproj.io/hook : PreSync
 spec:
   template:
     spec:
@@ -118,8 +118,8 @@ kind: Job
 metadata:
   name: job-db-sync
   annotations:
-    argocd.argoproj.io/sync-wave:"-1"
-    argocd.argoproj.io/hook:PreSync
+    argocd.argoproj.io/sync-wave : "-1"
+    argocd.argoproj.io/hook : PreSync
 spec:
   template:
     spec:
@@ -134,8 +134,8 @@ kind: Deployment
 metadata:
   name: keystone-api
   annotations:
-    argocd.argoproj.io/sync-wave:"0"
-    argocd.argoproj.io/hook:Sync
+    argocd.argoproj.io/sync-wave : "0"
+    argocd.argoproj.io/hook : Sync
 spec:
   replicas: 1
   selector:
@@ -156,8 +156,8 @@ kind: Job
 metadata:
   name: job-keystone-bootstrap
   annotations:
-    argocd.argoproj.io/sync-wave:"1"
-    argocd.argoproj.io/hook:PostSync
+    argocd.argoproj.io/sync-wave : "1"
+    argocd.argoproj.io/hook : PostSync
 spec:
   template:
     spec:
@@ -171,9 +171,9 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: job-keystone-test
-    annotations:
-    argocd.argoproj.io/sync-wave:"2"
-    argocd.argoproj.io/hook:PostSync
+  annotations:
+    argocd.argoproj.io/sync-wave : "2"
+    argocd.argoproj.io/hook : PostSync
 spec:
   template:
     spec:
@@ -187,9 +187,9 @@ apiVersion: batch/v1
 kind: CronJob
 metadata:
   name: cronjob-credential-rotate
-    annotations:
-    argocd.argoproj.io/sync-wave:"3"
-    argocd.argoproj.io/hook:PostSync
+  annotations:
+    argocd.argoproj.io/sync-wave: "3"
+    argocd.argoproj.io/hook: PostSync
 spec:
   schedule: "0 2 * * *"  # 每天凌晨2点执行
   jobTemplate:
@@ -206,9 +206,9 @@ apiVersion: batch/v1
 kind: CronJob
 metadata:
   name: cronjob-fernet-rotate
-    annotations:
-    argocd.argoproj.io/sync-wave:"3"
-    argocd.argoproj.io/hook:PostSync
+  annotations:
+    argocd.argoproj.io/sync-wave: "3"
+    argocd.argoproj.io/hook: PostSync
 spec:
   schedule: "0 3 * * *"  # 每天凌晨3点执行
   jobTemplate:
