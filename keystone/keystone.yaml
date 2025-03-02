@@ -155,7 +155,7 @@ kind: Job
 metadata:
   name: job-keystone-bootstrap
   annotations:
-    argocd.argoproj.io/sync-wave : "1"
+    argocd.argoproj.io/sync-wave : "2"
     argocd.argoproj.io/hook : PostSync
 spec:
   template:
@@ -171,7 +171,7 @@ kind: Job
 metadata:
   name: job-keystone-test
   annotations:
-    argocd.argoproj.io/sync-wave : "2"
+    argocd.argoproj.io/sync-wave : "3"
     argocd.argoproj.io/hook : PostSync
 spec:
   template:
@@ -187,8 +187,7 @@ kind: CronJob
 metadata:
   name: cronjob-credential-rotate
   annotations:
-    argocd.argoproj.io/sync-wave: "3"
-    argocd.argoproj.io/hook : PostSync
+    argocd.argoproj.io/sync-wave: "1"
 spec:
   schedule: "0 2 * * *"  # 每天凌晨2点执行
   jobTemplate:
@@ -206,8 +205,7 @@ kind: CronJob
 metadata:
   name: cronjob-fernet-rotate
   annotations:
-    argocd.argoproj.io/sync-wave: "3"
-    argocd.argoproj.io/hook : PostSync
+    argocd.argoproj.io/sync-wave: "1"
 spec:
   schedule: "0 3 * * *"  # 每天凌晨3点执行
   jobTemplate:
