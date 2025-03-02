@@ -188,6 +188,7 @@ metadata:
   name: cronjob-credential-rotate
   annotations:
     argocd.argoproj.io/sync-wave: "3"
+    argocd.argoproj.io/hook : PostSync
 spec:
   schedule: "0 2 * * *"  # 每天凌晨2点执行
   jobTemplate:
@@ -206,6 +207,7 @@ metadata:
   name: cronjob-fernet-rotate
   annotations:
     argocd.argoproj.io/sync-wave: "3"
+    argocd.argoproj.io/hook : PostSync
 spec:
   schedule: "0 3 * * *"  # 每天凌晨3点执行
   jobTemplate:
