@@ -129,19 +129,19 @@ persistence:
     registry:
       # Use the existing PVC which must be created manually before bound,
       # and specify the "subPath" if the PVC is shared with other components
-      existingClaim: "alibabacloud-cnfs-nas"
+      existingClaim: ""
       # Specify the "storageClass" used to provision the volume. Or the default
       # StorageClass will be used (the default).
       # Set it to "-" to disable dynamic provisioning
-      storageClass: ""
+      storageClass: "harbor-storage"
       subPath: ""
       accessMode: ReadWriteOnce
       size: 5Gi
       annotations: {}
     jobservice:
       jobLog:
-        existingClaim: "alibabacloud-cnfs-nas"
-        storageClass: ""
+        existingClaim: ""
+        storageClass: "harbor-storage"
         subPath: ""
         accessMode: ReadWriteOnce
         size: 1Gi
@@ -149,8 +149,8 @@ persistence:
     # If external database is used, the following settings for database will
     # be ignored
     database:
-      existingClaim: "alibabacloud-cnfs-nas"
-      storageClass: ""
+      existingClaim: ""
+      storageClass: "harbor-storage"
       subPath: ""
       accessMode: ReadWriteOnce
       size: 1Gi
@@ -158,15 +158,15 @@ persistence:
     # If external Redis is used, the following settings for Redis will
     # be ignored
     redis:
-      existingClaim: "alibabacloud-cnfs-nas"
-      storageClass: ""
+      existingClaim: ""
+      storageClass: "harbor-storage"
       subPath: ""
       accessMode: ReadWriteOnce
       size: 1Gi
       annotations: {}
     trivy:
-      existingClaim: "alibabacloud-cnfs-nas"
-      storageClass: ""
+      existingClaim: ""
+      storageClass: "harbor-storage"
       subPath: ""
       accessMode: ReadWriteOnce
       size: 5Gi
